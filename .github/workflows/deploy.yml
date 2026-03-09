@@ -1,4 +1,4 @@
-name: Web
+name: Deploy Expo Web to Pages
 on:
   push:
     branches:
@@ -6,34 +6,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  web:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 20
+          cache: npm
 
-      - name: ⚙️ Set up repository
-        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm ci
 
-      - name: ❇️ Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
+      - name: Export static web build
+        run: npx expo export -p web
+
+      - name: Disable Jekyll (Expo uses underscores)
+        run: touch dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          node-version: 16.10
+          path: dist
 
-      - name: 🔷 Set up Expo
-        uses: expo/expo-github-action@v7
-        with:
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: 📦 Install dependencies
-        run: npm install
-
-      - name: 🌐 Export the app
-        run: |
-          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          npm run deploy -- -u "github-actions-bot <support+actions@github.com>"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

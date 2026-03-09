@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "lab-4",
+    "name": "lab-4"
   },
   "android": {
     "adaptiveIcon": {
@@ -33,7 +33,7 @@
   ],
   "experiments": {
     "typedRoutes": true,
-    "reactCompiler": true
+    "reactCompiler": true,
+    "baseUrl": "/lab-4"
   }
-}
 }

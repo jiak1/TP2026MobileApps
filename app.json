@@ -33,7 +33,7 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true,
-      "baseUrl": "/lab-4"
+      "baseUrl": "/TP2026MobileApps"
     }
   }
 }

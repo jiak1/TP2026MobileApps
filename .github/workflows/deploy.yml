@@ -2,7 +2,7 @@ name: Deploy Expo Web to public branch
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 jobs:
